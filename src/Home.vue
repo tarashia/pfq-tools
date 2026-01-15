@@ -7,19 +7,26 @@ const apiKey = ref('');
 const lastUpdated = ref('');
 
 watch(apiKey, () => {
-    localStorage.setItem("x-api-key", apiKey.value);
+    if(apiKey.value && apiKey.value.trim() != '') {
+        localStorage.setItem('x-api-key', apiKey.value);
+    }
+    else {
+        console.log('Did not store empty API key');
+    }
 })
 
 let db;
 onMounted(async () => {
     db = await dbHandle;
-    apiKey.value = localStorage.getItem("x-api-key");
-    lastUpdated.value = localStorage.getItem("dex-updated");
+    apiKey.value = localStorage.getItem('x-api-key');
+    lastUpdated.value = localStorage.getItem('dex-updated');
 })
 
 async function runUpdate() {
     if(updateDex(db)) {
         const dateStr = new Date().toLocaleString();
+        localStorage.setItem('dex-updated', dateStr);
+        lastUpdated.value = dateStr;
     }
 }
 

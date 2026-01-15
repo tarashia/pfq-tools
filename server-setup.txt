@@ -1,0 +1,36 @@
+https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-20-04
+https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-22-04
+
+Quick overview on getting set up on DigitalOcean using Ubuntu
+- Ensure domain records are configured in DigitalOcean and name provider (Dynadot)
+- Connect w/ console and update ~/.ssh/authorized_keys to contain the .pub key in connecting computer's .ssh
+- Update ubuntu: apt upgrade
+- Install nginx: apt install nginx
+- Update UFW (profile for ufw Nginx will not exist before nginx is installed)
+    ufw status
+    ufw allow 'OpenSSH'
+    ufw allow 'Nginx Full'
+    ufw enable
+- Remove the symlink to the default nginx site config at /etc/nginx/sites-enabled (use unlink)
+- Create the new mirzam-pfq config inn sites-available
+- Install certbot: snap install --classic certbot
+- Run certbot: certbot --nginx -d pfq.mirzam.dev
+
+
+ln -s /etc/nginx/sites-available/mirzam-pfq /etc/nginx/sites-enabled/mirzam-pfq
+
+server {
+	listen 80;
+	listen [::]:80;
+
+	server_name pfq.mirzam.dev;
+
+	root /var/www/pfq.mirzam.dev;
+	index index.html;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+}
+
+certbot will update this basic config to use SSL

@@ -118,18 +118,19 @@ export function natureMatch(nature1, nature2) {
 
 export function isWeak(type1, type2, attack) {
     // check if either type is weak to this attack
-    const isWeak = types[type1]['weak'].includes(attack);
+    let weak = types[type1]['weak'].includes(attack);
     if(type2) {
-        isWeak = isWeak || types[type2]['weak'].includes(attack);
+        weak = weak || types[type2]['weak'].includes(attack);
     }
 
     // check if either type resists this attack
+    let resist = types[type1]['resist'].includes(attack);
     if(type2) {
-        isResist = isResist || types[type2]['resist'].includes(attack);
+        resist = resist || types[type2]['resist'].includes(attack);
     }
     
     // if the weakness is not countered, return true
-    return $isWeak && !$isResist;
+    return isWeak && !resist;
 }
 
 export function hasConflict(pkmn1Type1, pkmn1Type2, pkmn2Type1, pkmn2Type2) {
