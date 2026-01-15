@@ -33,13 +33,19 @@ async function checkMatch() {
         matchup.value.pkmn2 += '/' + pkmn2.formename;
     }
 
+    /* Genderless & Ditto */
+    if(pkmn1.formeid == '142' || pkmn2.formeid == '142') {
+        matchup.value.error = 'Ditto always has 80% base compatibility and 50% of the other parent\'s regular egg generation.';
+        return;
+    }
     /* EGG GROUP */
     if(
         (pkmn1.egggroup1 == 'Undiscovered' || pkmn2.egggroup1 == 'Undiscovered') ||
-        (pkmn1.egggroup1 != pkmn2.egggroup1 &&
-        pkmn1.egggroup1 != pkmn2.egggroup2 &&
-        pkmn1.egggroup2 != pkmn2.egggroup1 &&
-        pkmn1.egggroup2 != pkmn2.egggroup2)
+        (pkmn1.egggroup1 != pkmn2.egggroup1 && pkmn1.egggroup1 != pkmn2.egggroup2 &&
+        pkmn1.egggroup2 != pkmn2.egggroup1 && pkmn1.egggroup2 != pkmn2.egggroup2) ||
+        // Genderless exclusion, unless Falinks/Tandemaus
+        (pkmn1.genders == 'Genderless' && pkmn1.formeid != '869' && pkmn1.formeid != '923') || 
+        (pkmn2.genders == 'Genderless' && pkmn2.formeid != '869' && pkmn2.formeid != '923')
     ) {
         matchup.value.error = 'Not compatible';
         return;
@@ -165,7 +171,7 @@ async function checkMatch() {
         <button @click="checkMatch">Check</button>
     </div>
     <div>
-        <p>This checker assumes Pokemon are from separate evolutionary lines. <br>It will never include the species bonus, which can add 6, 8, or 10%.</p>
+        <p>This checker assumes Pokemon are from separate evolutionary lines. It will never include the species bonus, which can add 6, 8, or 10%.</p>
         <p v-if="matchup.error !=''">{{ matchup.error }}</p>
         <div v-else>
             <p>{{ matchup.pkmn1 }} + {{ matchup.pkmn2 }} = {{ matchup.compatibility }}% base</p>
