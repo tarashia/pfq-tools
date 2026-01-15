@@ -5,7 +5,7 @@
 
 <template>
     <select :name="name">
-        <option selected disabled value="">Nature</option>
+        <option selected value="">Nature</option>
         <option>Serious</option>
         <option>Lonely</option>
         <option>Adamant</option>

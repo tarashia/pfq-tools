@@ -23,7 +23,7 @@ onMounted(async () => {
 })
 
 async function runUpdate() {
-    if(updateDex(db)) {
+    if(await updateDex(db)) {
         const dateStr = new Date().toLocaleString();
         localStorage.setItem('dex-updated', dateStr);
         lastUpdated.value = dateStr;

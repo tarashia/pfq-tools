@@ -102,7 +102,10 @@ export const types = {
 }
 
 export function natureMatch(nature1, nature2) {
-    if(nature1 == nature2) {
+    if(!Object.hasOwn(natures, nature1) || !Object.hasOwn(natures, nature2)) {
+        return -1;
+    }
+    else if(nature1 == nature2) {
         return 3;
     }
     else if(natures[nature1]['up'] == natures[nature2]['up']) {
@@ -119,26 +122,26 @@ export function natureMatch(nature1, nature2) {
 export function isWeak(type1, type2, attack) {
     // check if either type is weak to this attack
     let weak = types[type1]['weak'].includes(attack);
-    if(type2) {
+    if(type2 && type2 != '') {
         weak = weak || types[type2]['weak'].includes(attack);
     }
 
     // check if either type resists this attack
     let resist = types[type1]['resist'].includes(attack);
-    if(type2) {
+    if(type2 && type2 != '') {
         resist = resist || types[type2]['resist'].includes(attack);
     }
     
     // if the weakness is not countered, return true
-    return isWeak && !resist;
+    return weak && !resist;
 }
 
 export function hasConflict(pkmn1Type1, pkmn1Type2, pkmn2Type1, pkmn2Type2) {
     if(
-        isWeak(pkmn1Type1.toLowerCase(), pkmn1Type2.toLowerCase(), pkmn2Type1.toLowerCase()) ||
-        isWeak(pkmn1Type1.toLowerCase(), pkmn1Type2.toLowerCase(), pkmn2Type2.toLowerCase()) ||
-        isWeak(pkmn2Type1.toLowerCase(), pkmn2Type2.toLowerCase(), pkmn1Type1.toLowerCase()) ||
-        isWeak(pkmn2Type1.toLowerCase(), pkmn2Type2.toLowerCase(), pkmn1Type2.toLowerCase())
+        isWeak(pkmn1Type1, pkmn1Type2, pkmn2Type1) ||
+        isWeak(pkmn1Type1, pkmn1Type2, pkmn2Type2) ||
+        isWeak(pkmn2Type1, pkmn2Type2, pkmn1Type1) ||
+        isWeak(pkmn2Type1, pkmn2Type2, pkmn1Type2)
     ) {
         return true;
     }

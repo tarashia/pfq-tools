@@ -5,7 +5,9 @@ import NatureDropdown from './components/NatureDropdown.vue'
 import DeltaTypeDropdown from './components/DeltaTypeDropdown.vue'
 
 const { dbHandle } = defineProps(['dbHandle']);
-const output = ref('(not run)');
+const matchup = ref({
+    error: '(not run)'
+});
 
 let db;
 onMounted(async () => {
@@ -13,22 +15,22 @@ onMounted(async () => {
 })
 
 async function checkMatch() {
-    //const data = new FormData(document.getElementById("matchupForm"));
     const data = Object.fromEntries(new FormData(document.getElementById("matchupForm")));
     const pkmn1 = await db.dex.findOne(data.pkmn1).exec();
     const pkmn2 = await db.dex.findOne(data.pkmn2).exec();
     if(!pkmn1 || !pkmn2) {
-        output.value = 'Error: Pokemon not found'; //todo imporve error handling
+        matchup.value.error = 'Error: Pokemon not found'; //todo improve error handling
+        return;
     }
-    let matchup = {
-        pkmn1: pkmn1.name,
-        pkmn2: pkmn2.name
-    };
+    matchup.value.error = '';
+    matchup.value.pkmn1 = pkmn1.name;
+    matchup.value.pkmn2 = pkmn2.name;
+
     if(pkmn1.formename) {
-        matchup.pkmn1 += '/' + pkmn1.formename;
+        matchup.value.pkmn1 += '/' + pkmn1.formename;
     }
     if(pkmn2.formename) {
-        matchup.pkmn2 += '/' + pkmn2.formename;
+        matchup.value.pkmn2 += '/' + pkmn2.formename;
     }
 
     /* EGG GROUP */
@@ -39,7 +41,8 @@ async function checkMatch() {
         pkmn1.egggroup2 != pkmn2.egggroup1 &&
         pkmn1.egggroup2 != pkmn2.egggroup2)
     ) {
-        output.value = 'Not compatible';
+        matchup.value.error = 'Not compatible';
+        return;
     }
 
     // Base compatibility = 20%
@@ -47,29 +50,29 @@ async function checkMatch() {
     
     /* TYPES */
     if(
-        pkmn1.type1 == pkmn2.type1 ||
-        (pkmn1.type1 == pkmn2.type2 && pkmn2.type2 != null) ||
-        (pkmn1.type2 == pkmn2.type1 && pkmn1.type2 != null) ||
-        (pkmn1.type2 == pkmn2.type2 && pkmn1.type2 != null && pkmn2.type2 != null)
+        pkmn1.types[0] == pkmn2.types[0] ||
+        (pkmn2.types[1] != '' && pkmn1.types[0] == pkmn2.types[1]) ||
+        (pkmn1.types[1] != '' && pkmn1.types[1] == pkmn2.types[0]) ||
+        (pkmn1.types[1] != '' && pkmn2.types[1] != '' && pkmn1.types[1] == pkmn2.types[1])
     ) {
         comp += 8;
-        matchup.type = 'match +8%';
+        matchup.value.type = 'Match +8%';
     }
-    else if(hasConflict(pkmn1.type1, pkmn1.type2, pkmn2.type1, pkmn2.type2)) {
-        matchup.type = 'conflict 0%';
+    else if(hasConflict(pkmn1.types[0], pkmn1.types[1], pkmn2.types[0], pkmn2.types[1])) {
+        matchup.value.type = 'Conflict 0%';
     }
     else {
         comp += 4;
-        matchup.type = 'neutral +4%';
+        matchup.value.type = 'Neutral +4%';
     }
 
     /* BODY */
     if(pkmn1.bodytype == pkmn2.bodytype) {
         comp += 8;
-        matchup.bodytype = 'match +8%';
+        matchup.value.bodytype = '+8%';
     }
     else {
-        matchup.bodytype = 'no match 0%';
+        matchup.value.bodytype = '0%';
     }
 
     /* SIZE */
@@ -80,7 +83,10 @@ async function checkMatch() {
             heightPenalty = 15;
         }
         comp -= heightPenalty;
-        matchup.heightPenalty = '-' + heightPenalty + '%';
+        matchup.value.heightPenalty = '-' + heightPenalty + '%';
+    }
+    else {
+        delete matchup.value.heightPenalty;
     }
     const weightDiff = Math.abs(pkmn1.size.weight - pkmn2.size.weight).toFixed(2);
     if(weightDiff > 100) {
@@ -89,45 +95,51 @@ async function checkMatch() {
             weightPenalty = 10;
         }
         comp -= weightPenalty;
-        matchup.weightPenalty = '-' + weightPenalty + '%';
+        matchup.value.weightPenalty = '-' + weightPenalty + '%';
+    }
+    else {
+        delete matchup.value.weightPenalty;
     }
 
     /* NATURE */
-    if('nature1' in data && 'nature2' in data) {
-        const nat = natureMatch(data.nature1,data.nature2);
-        if(nat == 3) {
-            comp += 14;
-            matchup.nature = 'exact match +14%';
-        }
-        else if(nat == 2) {
-            comp += 8;
-            matchup.nature = 'shares like +8%';
-        }
-        else if(nat == 1){
-            comp += 4;
-            matchup.nature = 'shares dislike +4%';
-        }
-        else {
-            matchup.nature = 'no match 0%';
-        }
+    const nat = natureMatch(data.nature1,data.nature2);
+    if(nat == 3) {
+        comp += 14;
+        matchup.value.nature = 'Exact match +14%';
+    }
+    else if(nat == 2) {
+        comp += 8;
+        matchup.value.nature = 'Shares like +8%';
+    }
+    else if(nat == 1){
+        comp += 4;
+        matchup.value.nature = 'Shares dislike +4%';
+    }
+    else if(nat == 0) {
+        matchup.value.nature = 'No match 0%';
     }
     else {
-        matchup.nature = 'not provided';
+        delete matchup.value.nature;
     }
 
     /* TRADE */
     if('traded' in data && (data.traded===true || data.traded=='true' || data.traded=='on')) {
         comp += 20;
-        matchup.traded = 'true +20%';
+        matchup.value.traded = '+20%';
+    }
+    else {
+        delete matchup.value.traded;
     }
 
     if(comp < 10) {
         comp = 10;
-        matchup.clamping = 'clamped to 10%';
+        matchup.value.clamping = 'Clamped to 10%';
     }
-    matchup.compatibility = comp;
+    else {
+        delete matchup.value.clamping;
+    }
 
-    output.value = JSON.stringify(matchup);
+    matchup.value.compatibility = comp;
 }
 
 </script>
@@ -154,7 +166,20 @@ async function checkMatch() {
     </div>
     <div>
         <p>This checker assumes Pokemon are from separate evolutionary lines. <br>It will never include the species bonus, which can add 6, 8, or 10%.</p>
-        <p>{{ output }}</p>
+        <p v-if="matchup.error !=''">{{ matchup.error }}</p>
+        <div v-else>
+            <p>{{ matchup.pkmn1 }} + {{ matchup.pkmn2 }} = {{ matchup.compatibility }}% base</p>
+            <ul>
+                <li>Base: 20%</li>
+                <li>Body type: {{ matchup.bodytype }}</li>
+                <li>Type matchup: {{ matchup.type }}</li>
+                <li v-if="Object.hasOwn(matchup, 'nature')">Nature matchup: {{ matchup.nature }}</li>
+                <li v-if="Object.hasOwn(matchup, 'heightPenalty')">Height difference: {{ matchup.heightPenalty }}</li>
+                <li v-if="Object.hasOwn(matchup, 'weightPenalty')">Weight difference: {{ matchup.weightPenalty }}</li>
+                <li v-if="Object.hasOwn(matchup, 'traded')">Traded: {{ matchup.traded }}</li>
+                <li v-if="Object.hasOwn(matchup, 'clamping')">Clamping: {{ matchup.clamping }}</li>
+            </ul>
+        </div>
     </div>
 </template>
 

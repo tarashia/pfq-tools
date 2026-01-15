@@ -26,6 +26,9 @@ function transformSchema(apiData) {
             pkmnEntry.hasegg = pkmnEntry.eggdesc !== null;
             delete pkmnEntry.eggdesc;
             delete pkmnEntry.pkmndesc;
+            if(pkmnEntry.types.length == 1) {
+                pkmnEntry.types[1] = '';
+            }
             dexData.push(pkmnEntry);
         }
     }

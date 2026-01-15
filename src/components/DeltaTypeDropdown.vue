@@ -5,7 +5,7 @@
 
 <template>
     <select :name="name">
-        <option selected disabled value="">Delta?</option>
+        <option selected value="">Delta?</option>
         <option value="">None</option>
         <option>Normal</option>
         <option>Fire</option>
