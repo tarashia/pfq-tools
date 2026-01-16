@@ -210,7 +210,7 @@ async function checkMatch() {
         <button @click="checkMatch">Check</button>
     </div>
     <div>
-        <p>This checker assumes Pokemon are from separate evolutionary lines. It will never include the species bonus, which can add 6, 8, or 10%.</p>
+        <p style="max-width: 600px;">This checker assumes Pokemon are from separate evolutionary lines. It will never include the species bonus, which can add 6, 8, or 10%. It cannot currently predict special outcomes, like breeding two non-variants to produce a variant. For Unown letters, please see Eltafez's calculator.</p>
         <p v-if="matchup.error !=''">{{ matchup.error }}</p>
         <div v-else>
             <p>{{ matchup.pkmn1 }} + {{ matchup.pkmn2 }} = {{ matchup.compatibility }}% base</p>
