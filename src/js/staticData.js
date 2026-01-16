@@ -101,6 +101,37 @@ export const types = {
     }
 }
 
+export const genderRatios = {
+    'All Male': {
+        maleInfluence: 8,
+        femaleInfluence: 0
+    },
+    '7 Male to 1 Female': {
+        maleInfluence: 7,
+        femaleInfluence: 1
+    },
+    '6 Male to 2 Female': {
+        maleInfluence: 6,
+        femaleInfluence: 2
+    },
+    '1 Male to 1 Female': {
+        maleInfluence: 4,
+        femaleInfluence: 4
+    },
+    '2 Male to 6 Female': {
+        maleInfluence: 2,
+        femaleInfluence: 6
+    },
+    '1 Male to 7 Female': {
+        maleInfluence: 1,
+        femaleInfluence: 7
+    },
+    'All Female': {
+        maleInfluence: 0,
+        femaleInfluence: 8
+    }
+};
+
 export function natureMatch(nature1, nature2) {
     if(!Object.hasOwn(natures, nature1) || !Object.hasOwn(natures, nature2)) {
         return -1;

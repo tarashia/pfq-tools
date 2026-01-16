@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { natureMatch, hasConflict } from './js/staticData.js'
+import { natureMatch, hasConflict, genderRatios } from './js/staticData.js'
 import NatureDropdown from './components/NatureDropdown.vue'
 import DeltaTypeDropdown from './components/DeltaTypeDropdown.vue'
 
@@ -159,6 +159,32 @@ async function checkMatch() {
     }
 
     matchup.value.compatibility = comp;
+
+    /* Egg ratio */
+    let pkmn1MaleInfluence = 0;
+    let pkmn2MaleInfluence = 0;
+    for(const ratio in genderRatios) {
+        if(pkmn1.genders == ratio) {
+            pkmn1MaleInfluence = genderRatios[ratio].maleInfluence;
+        }
+        if(pkmn2.genders == ratio) {
+            pkmn2MaleInfluence = genderRatios[ratio].maleInfluence;
+        }
+    }
+    // if pkmn1 is father
+    if(pkmn1MaleInfluence != 0) {
+        matchup.value.pkmn1FatherPercent = ((pkmn1MaleInfluence + pkmn2MaleInfluence) / 16) * 100;
+    }
+    else {
+        delete matchup.value.pkmn1FatherPercent;
+    }
+    // if pkmn2 is father
+    if(pkmn2MaleInfluence != 0) {
+        matchup.value.pkmn2FatherPercent = ((pkmn2MaleInfluence + pkmn1MaleInfluence) / 16) * 100;
+    }
+    else {
+        delete matchup.value.pkmn2FatherPercent;
+    }
 }
 
 </script>
@@ -198,6 +224,21 @@ async function checkMatch() {
                 <li v-if="Object.hasOwn(matchup, 'traded')">Traded: {{ matchup.traded }}</li>
                 <li v-if="Object.hasOwn(matchup, 'clamping')">Clamping: {{ matchup.clamping }}</li>
             </ul>
+            <template v-if="Object.hasOwn(matchup, 'pkmn1FatherPercent')">
+                <p>If {{ matchup.pkmn1 }} is the father, then:</p>
+                <ul>
+                    <li>{{ matchup.pkmn1FatherPercent }}% eggs from {{ matchup.pkmn1 }}</li>
+                    <li>{{ 100 - matchup.pkmn1FatherPercent }}% eggs from {{ matchup.pkmn2 }}</li>
+                </ul>
+            </template>
+            <template v-if="Object.hasOwn(matchup, 'pkmn2FatherPercent')">
+                <p>If {{ matchup.pkmn2 }} is the father, then:</p>
+                <ul>
+                    <li>{{ matchup.pkmn2FatherPercent }}% eggs from {{ matchup.pkmn2 }}</li>
+                    <li>{{ 100 - matchup.pkmn2FatherPercent }}% eggs from {{ matchup.pkmn1 }}</li>
+                </ul>
+            </template>
+            <p>* Note: If one parent is a PFQ exclusive/variant, its actual egg % will be lower due to (No Egg) production.</p>
         </div>
     </div>
 </template>
