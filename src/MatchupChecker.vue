@@ -33,19 +33,32 @@ async function checkMatch() {
         matchup.value.pkmn2 += '/' + pkmn2.formename;
     }
 
-    /* Genderless & Ditto */
+    /* Ditto */
     if(pkmn1.formeid == '142' || pkmn2.formeid == '142') {
         matchup.value.error = 'Ditto always has 80% base compatibility and 50% of the other parent\'s regular egg generation.';
+        return;
+    }
+    /* Gender exceptions */
+    if(
+        // Genderless exclusion, unless Falinks/Tandemaus
+        (pkmn1.genders == 'Genderless' && pkmn1.formeid != '869' && pkmn1.formeid != '923') || 
+        (pkmn2.genders == 'Genderless' && pkmn2.formeid != '869' && pkmn2.formeid != '923')
+    ) {
+        matchup.value.error = 'Not compatible - genderless parent';
+        return;
+    }
+    if(
+        (pkmn1.genders == 'All Male' && pkmn2.genders == 'All Male') ||
+        (pkmn1.genders == 'All Female' && pkmn2.genders == 'All Female')
+    ) {
+        matchup.value.error = 'Not compatible - monogender parents';
         return;
     }
     /* EGG GROUP */
     if(
         (pkmn1.egggroup1 == 'Undiscovered' || pkmn2.egggroup1 == 'Undiscovered') ||
         (pkmn1.egggroup1 != pkmn2.egggroup1 && pkmn1.egggroup1 != pkmn2.egggroup2 &&
-        pkmn1.egggroup2 != pkmn2.egggroup1 && pkmn1.egggroup2 != pkmn2.egggroup2) ||
-        // Genderless exclusion, unless Falinks/Tandemaus
-        (pkmn1.genders == 'Genderless' && pkmn1.formeid != '869' && pkmn1.formeid != '923') || 
-        (pkmn2.genders == 'Genderless' && pkmn2.formeid != '869' && pkmn2.formeid != '923')
+        pkmn1.egggroup2 != pkmn2.egggroup1 && pkmn1.egggroup2 != pkmn2.egggroup2)
     ) {
         matchup.value.error = 'Not compatible';
         return;
