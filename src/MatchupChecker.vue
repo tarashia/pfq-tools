@@ -100,7 +100,7 @@ async function checkMatch() {
     /* SIZE */
     const heightDiff = Math.abs(pkmn1.size.height - pkmn2.size.height).toFixed(2);
     if(heightDiff > 0.8) {
-        let heightPenalty = Math.floor((heightDiff - 0.8) / 0.4);
+        let heightPenalty = Math.ceil((heightDiff - 0.8) / 0.4);
         if(heightPenalty > 15) {
             heightPenalty = 15;
         }
@@ -112,7 +112,7 @@ async function checkMatch() {
     }
     const weightDiff = Math.abs(pkmn1.size.weight - pkmn2.size.weight).toFixed(2);
     if(weightDiff > 100) {
-        let weightPenalty = Math.floor((weightDiff - 100) / 20);
+        let weightPenalty = Math.ceil((weightDiff - 100) / 20);
         if(weightPenalty > 10) {
             weightPenalty = 10;
         }
