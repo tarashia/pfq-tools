@@ -98,6 +98,7 @@ async function checkMatch() {
     }
 
     /* SIZE */
+    // todo: floor is not correct, but is it round or ciel?
     const heightDiff = Math.abs(pkmn1.size.height - pkmn2.size.height).toFixed(2);
     if(heightDiff > 0.8) {
         let heightPenalty = Math.ceil((heightDiff - 0.8) / 0.4);
