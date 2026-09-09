@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { natureMatch, hasConflict, genderRatios } from './js/staticData.js'
 import NatureDropdown from './components/NatureDropdown.vue'
-import DeltaTypeDropdown from './components/DeltaTypeDropdown.vue'
 
 const { dbHandle } = defineProps(['dbHandle']);
 const matchup = ref({
@@ -77,7 +76,11 @@ async function checkMatch() {
         comp += 8;
         matchup.value.type = 'Match +8%';
     }
-    else if(hasConflict(pkmn1.types[0], pkmn1.types[1], pkmn2.types[0], pkmn2.types[1])) {
+    else if(hasConflict(pkmn1.types[0], pkmn1.types[1], pkmn2.types[0]) ||
+            hasConflict(pkmn1.types[0], pkmn1.types[1], pkmn2.types[1]) ||
+            hasConflict(pkmn2.types[0], pkmn2.types[1], pkmn1.types[0]) ||
+            hasConflict(pkmn2.types[0], pkmn2.types[1], pkmn1.types[1])
+    ) {
         matchup.value.type = 'Conflict 0%';
     }
     else {
@@ -131,8 +134,8 @@ async function checkMatch() {
         matchup.value.nature = 'Shares like +8%';
     }
     else if(nat == 1){
-        comp += 4;
-        matchup.value.nature = 'Shares dislike +4%';
+        comp += 6;
+        matchup.value.nature = 'Shares dislike +6%';
     }
     else if(nat == 0) {
         matchup.value.nature = 'No match 0%';
@@ -193,17 +196,17 @@ async function checkMatch() {
     <p>This is the matchup checker</p>
     <form id="matchupForm">
         <div>
-            <input placeholder="Dex ID 1" name="pkmn1" value="315">
+            <input placeholder="Dex ID 1" name="pkmn1">
             <NatureDropdown name="nature1" />
             <!--<DeltaTypeDropdown name="delta1" />-->
         </div>
         <div>
-            <input placeholder="Dex ID 2" name="pkmn2" value="335">
+            <input placeholder="Dex ID 2" name="pkmn2">
             <NatureDropdown name="nature2" />
             <!--<DeltaTypeDropdown name="delta2" />-->
         </div>
         <div>
-            <input type="checkbox" id="traded" name="traded"/> <label for="traded">Traded?</label>
+            <input type="checkbox" id="traded" name="traded" checked/> <label for="traded">Traded?</label>
         </div>
     </form>
     <div>
